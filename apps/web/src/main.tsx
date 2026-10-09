@@ -942,7 +942,9 @@ function ProjectDetail({ id, rev, act, busy, choose, user }: Data) {
   const { data, error } = useData("/projects/" + id, rev, true);
   const [tab, setTab] = useState("overview"),
     [modal, setModal] = useState(""),
-    [build, setBuild] = useState<Data>(null);
+    [build, setBuild] = useState<Data>(null),
+    [environmentId, setEnvironmentId] = useState("");
+  useEffect(() => setEnvironmentId(""), [id]);
   useEffect(() => {
     choose(id);
     api("/demo/build")
@@ -951,7 +953,9 @@ function ProjectDetail({ id, rev, act, busy, choose, user }: Data) {
   }, [id, rev]);
   if (error) return <div className="error-box">{error}</div>;
   if (!data) return <Loading />;
-  const env = data.environments[0],
+  const env =
+      data.environments.find((e: Data) => e.id === environmentId) ||
+      data.environments[0],
     approved = data.cases.filter(
       (c: Data) => c.status === "approved" && !c.archived,
     );
@@ -1000,9 +1004,26 @@ function ProjectDetail({ id, rev, act, busy, choose, user }: Data) {
         }
       />
       <div className="project-meta">
-        <span>
-          <span className="dot good" /> {env.name}
-        </span>
+        {data.environments.length > 1 ? (
+          <label>
+            Environment{" "}
+            <select
+              aria-label="Test environment"
+              value={env.id}
+              onChange={(event) => setEnvironmentId(event.target.value)}
+            >
+              {data.environments.map((e: Data) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <span>
+            <span className="dot good" /> {env.name}
+          </span>
+        )}
         <a href={env.base_url} target="_blank" rel="noreferrer">
           {env.base_url}
           <ArrowUpRight size={14} />
@@ -1029,11 +1050,13 @@ function ProjectDetail({ id, rev, act, busy, choose, user }: Data) {
               <p>Observe pages and controls with a bounded browser crawl.</p>
               <select aria-label="Discovery role" id="discoveryRole">
                 <option value="">Signed out</option>
-                {data.secrets.map((s: Data) => (
-                  <option key={s.id} value={s.name}>
-                    {s.name}
-                  </option>
-                ))}
+                {data.secrets
+                  .filter((s: Data) => s.environment_id === env.id)
+                  .map((s: Data) => (
+                    <option key={s.id} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
               </select>
               <Button
                 kind="secondary"
@@ -1156,8 +1179,8 @@ function ProjectDetail({ id, rev, act, busy, choose, user }: Data) {
           </div>
           {!data.generations.length ? (
             <p className="muted padded">
-              No AI generations yet. Gather’s initial examples are authored demo
-              scenarios.
+              No AI generations yet. Analyze this application, then generate
+              draft scenarios.
             </p>
           ) : (
             data.generations.map((g: Data) => (

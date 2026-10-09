@@ -102,4 +102,6 @@ The integration scripts mutate only this local installation and its owned demo. 
 
 See [the MVP verification report](docs/MVP_Verification_Report.md) for measured results, presentation links, AI review corrections, and the commercial release boundaries.
 
+A second owned application, [Parcel](https://github.com/Muthuram05/parcel-regression-demo), has three open demonstration PRs. See [the Parcel connection and PR guide](docs/Parcel_PR_Demo.md) for the correct fix, intentional regression, new feature, and local preview commands.
+
 The original specification and technical design are in `docs/`. This README records the implemented local scope and known differences from the broader product design. Use actual verification output when presenting results.

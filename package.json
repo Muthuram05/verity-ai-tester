@@ -23,6 +23,9 @@
     "test:controls": "node --import tsx scripts/verify-controls.ts --runner",
     "test:network": "node --import tsx scripts/verify-network.ts",
     "test:ui": "node --import tsx scripts/verify-ui.ts",
+    "demo:parcel": "node scripts/parcel-previews.mjs",
+    "demo:parcel:connect": "node --import tsx scripts/connect-parcel.ts",
+    "demo:parcel:verify": "node --import tsx scripts/connect-parcel.ts --verify",
     "format": "prettier --write --ignore-unknown apps packages scripts tests infrastructure README.md"
   },
   "dependencies": {

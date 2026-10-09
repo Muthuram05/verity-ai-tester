@@ -408,6 +408,47 @@ route(
     return { id: pid, environmentId: eid };
   },
 );
+route(
+  "POST",
+  "/projects/:id/environments",
+  "owner",
+  z
+    .object({
+      name: short,
+      baseUrl: z.url(),
+      allowedOrigins: z.array(z.url()).max(10).default([]),
+    })
+    .strict(),
+  async (r, reply, db, b, u) => {
+    const pid = param(r);
+    need(
+      await one(db, "select id from projects where id=$1 for update", [pid]),
+    );
+    await entitlement(db, u.org_id);
+    const count = await one(
+      db,
+      "select count(*) n from environments where project_id=$1",
+      [pid],
+    );
+    if (Number(count.n) >= 10)
+      throw new AppError(
+        429,
+        "ENVIRONMENT_LIMIT",
+        "A local project supports up to ten environments",
+      );
+    const url = targetURL(b.baseUrl);
+    const origins = b.allowedOrigins.map(
+      (value: string) => targetURL(value).origin,
+    );
+    const eid = randomUUID();
+    await db.query(
+      "insert into environments(id,org_id,project_id,name,base_url,allowed_origins) values($1,$2,$3,$4,$5,$6)",
+      [eid, u.org_id, pid, b.name, url.href, JSON.stringify(origins)],
+    );
+    reply.code(201);
+    return { id: eid };
+  },
+);
 route("POST", "/demo", "owner", empty, async (_r, reply, db, _b, u) => {
   reply.code(201);
   return seedDemo(db, u.org_id);
