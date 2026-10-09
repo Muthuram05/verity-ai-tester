@@ -1,0 +1,16 @@
+node_modules
+.cache
+.local
+.env
+.git
+docs
+test-results
+dist
+demo-project
+*.mp4
+!.local
+.local/*
+!.local/browser.mjs
+
+!.local/runner-deps
+!.local/runner-deps/**

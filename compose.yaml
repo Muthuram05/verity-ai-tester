@@ -1,0 +1,45 @@
+name: aitester
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: aitester_admin
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: aitester
+    ports: ["127.0.0.1:5433:5432"]
+    volumes: ["database:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aitester_admin -d aitester"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    networks: [database]
+  demo:
+    build:
+      context: .
+      dockerfile: infrastructure/services.Dockerfile
+    command: ["node", "apps/demo/server.mjs"]
+    environment:
+      DEMO_KEY: ${DEMO_KEY}
+    ports: ["127.0.0.1:4174:4174"]
+    networks: [egress]
+    read_only: true
+    tmpfs: [/tmp]
+  proxy:
+    build:
+      context: .
+      dockerfile: infrastructure/services.Dockerfile
+    command: ["node", "infrastructure/proxy.mjs"]
+    environment:
+      PROXY_KEY: ${PROXY_KEY}
+    networks: [execution, egress]
+    read_only: true
+    tmpfs: [/tmp]
+networks:
+  database: {}
+  execution:
+    name: aitester_execution
+    internal: true
+  egress: {}
+volumes:
+  database: {}

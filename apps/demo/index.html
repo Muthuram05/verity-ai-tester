@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Gather | Demo community</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          16px/1.55 "Avenir Next",
+          system-ui,
+          sans-serif;
+        background: #edf3f5;
+        color: #203744;
+      }
+      header {
+        padding: 24px 7%;
+        background: #fff;
+        border-bottom: 1px solid #ccdce2;
+        display: flex;
+        align-items: center;
+        gap: 36px;
+      }
+      header strong {
+        font-size: 26px;
+        color: #285569;
+      }
+      a {
+        color: #285569;
+        margin-right: 20px;
+      }
+      main {
+        max-width: 780px;
+        margin: 45px auto;
+        padding: 0 24px;
+      }
+      section,
+      article {
+        background: white;
+        border: 1px solid #d5e0e5;
+        border-radius: 12px;
+        padding: 26px;
+        margin: 18px 0;
+      }
+      h1 {
+        font-size: 32px;
+        letter-spacing: -1px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin: 18px 0 6px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #afc4ce;
+        border-radius: 6px;
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 6px;
+        background: #285569;
+        color: white;
+        padding: 11px 18px;
+        font: inherit;
+        cursor: pointer;
+        margin: 12px 8px 0 0;
+      }
+      button.secondary {
+        color: #285569;
+        background: #eaf1f4;
+      }
+      small {
+        color: #617783;
+      }
+      #message {
+        color: #a23737;
+      }
+      nav {
+        flex: 1;
+      }
+      footer {
+        color: #70818a;
+        font-size: 13px;
+        text-align: center;
+        padding: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Gather</strong>
+      <nav>
+        <a href="/feed">Feed</a><a href="/profile">Profile</a
+        ><a href="/search">Search</a><a href="/comments">Discussion</a>
+      </nav>
+      <button id="logout" class="secondary" hidden>Sign out</button>
+    </header>
+    <main id="app"></main>
+    <footer>Owned test application · Synthetic accounts and data</footer>
+    <script>
+      const app = document.querySelector("#app");
+      const esc = (s) =>
+        String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      async function api(path, data, method = "POST") {
+        const r = await fetch("/api" + path, {
+          method: data ? method : "GET",
+          headers: { "content-type": "application/json" },
+          body: data ? JSON.stringify(data) : undefined,
+        });
+        const b = await r.json();
+        if (!r.ok) throw Error(b.error);
+        return b;
+      }
+      function message(s) {
+        document.querySelector("#message").textContent = s;
+      }
+      let state;
+      async function render() {
+        const path = location.pathname;
+        if (path === "/login" || path === "/") {
+          app.innerHTML =
+            '<h1>Welcome back</h1><p>Sign in to your Gather community.</p><section><form id="login"><label for="email">Email</label><input id="email" type="email" required><label for="password">Password</label><input id="password" type="password" required><p id="message" data-testid="message" role="alert"></p><button>Sign in</button></form><small>Demo: alex@example.test / demo-password</small></section>';
+          document.querySelector("#login").onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+              await api("/login", {
+                email: email.value,
+                password: password.value,
+              });
+              location.href = "/feed";
+            } catch (e) {
+              message(e.message);
+            }
+          };
+          return;
+        }
+        try {
+          state = await api("/state");
+        } catch {
+          location.href = "/login";
+          return;
+        }
+        document.querySelector("#logout").hidden = false;
+        document.querySelector("#logout").onclick = async () => {
+          await api("/logout", {});
+          location.href = "/login";
+        };
+        if (path === "/profile") {
+          app.innerHTML =
+            '<h1>Your profile</h1><p>Make yourself at home.</p><section><form id="profile"><label for="displayName">Display name</label><input id="displayName" value="' +
+            esc(state.profile) +
+            '"><label for="bio">Bio</label><textarea id="bio">' +
+            esc(state.bio) +
+            '</textarea><p id="message" data-testid="message" role="status"></p><button>Save profile</button></form></section>';
+          document.querySelector("#profile").onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+              await api("/profile", {
+                name: displayName.value,
+                bio: bio.value,
+              });
+              message("Profile saved");
+            } catch (e) {
+              message(e.message);
+            }
+          };
+        } else if (path === "/search") {
+          app.innerHTML =
+            '<h1>Find a conversation</h1><label for="query">Search posts</label><input id="query"><div id="results" data-testid="results"></div><p id="message" data-testid="message" role="status"></p>';
+          query.oninput = () => {
+            const found = state.posts.filter((p) =>
+              p.text.toLowerCase().includes(query.value.toLowerCase()),
+            );
+            results.innerHTML = found
+              .map((p) => "<article>" + esc(p.text) + "</article>")
+              .join("");
+            message(found.length ? "" : "No posts found");
+          };
+          query.oninput();
+        } else if (path === "/comments") {
+          app.innerHTML =
+            '<h1>Discussion</h1><section><h2>What are you building?</h2><div id="comments" data-testid="comments">' +
+            state.comments.map((s) => "<p>" + esc(s) + "</p>").join("") +
+            '</div><form id="comment"><label for="commentText">Comment</label><textarea id="commentText"></textarea><p id="message" data-testid="message" role="alert"></p><button>Add comment</button></form></section>';
+          document.querySelector("#comment").onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+              await api("/comments", { text: commentText.value });
+              render();
+            } catch (e) {
+              message(e.message);
+            }
+          };
+        } else {
+          app.innerHTML =
+            '<h1>Your community</h1><p>Good ideas start with a conversation.</p><section><form id="publish"><label for="postText">Post text</label><textarea id="postText"></textarea><p id="message" data-testid="message" role="alert"></p><button>Publish post</button></form></section><div id="posts" data-testid="posts">' +
+            state.posts
+              .map(
+                (p) =>
+                  '<article data-testid="post-' +
+                  p.id +
+                  '"><small>' +
+                  esc(p.owner) +
+                  '</small><p data-testid="post-body-' +
+                  p.id +
+                  '">' +
+                  esc(p.text) +
+                  "</p>" +
+                  (p.owner === state.user || state.mode === "buggy"
+                    ? '<button class="secondary" data-edit="' +
+                      p.id +
+                      '" aria-label="Edit post ' +
+                      p.id +
+                      '">Edit</button>'
+                    : "") +
+                  (p.owner === state.user
+                    ? '<button class="secondary" data-delete="' +
+                      p.id +
+                      '" aria-label="Delete post ' +
+                      p.id +
+                      '">Delete</button>'
+                    : "") +
+                  "</article>",
+              )
+              .join("") +
+            "</div>";
+          document.querySelector("#publish").onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+              await api("/posts", { text: postText.value });
+              render();
+            } catch (e) {
+              message(e.message);
+            }
+          };
+          document.querySelectorAll("[data-edit]").forEach(
+            (btn) =>
+              (btn.onclick = () => {
+                const id = btn.dataset.edit;
+                const card = btn.closest("article");
+                const post = state.posts.find((p) => p.id === id);
+                card.innerHTML =
+                  '<form><label for="editText">Edit post text</label><textarea id="editText">' +
+                  esc(post.text) +
+                  '</textarea><button>Save post</button><p role="alert" class="editError"></p></form>';
+                card.querySelector("form").onsubmit = async (e) => {
+                  e.preventDefault();
+                  try {
+                    await api(
+                      "/posts/" + id,
+                      { text: editText.value },
+                      "PATCH",
+                    );
+                    render();
+                  } catch (e) {
+                    card.querySelector(".editError").textContent = e.message;
+                  }
+                };
+              }),
+          );
+          document.querySelectorAll("[data-delete]").forEach(
+            (btn) =>
+              (btn.onclick = async () => {
+                await api("/posts/" + btn.dataset.delete, {}, "DELETE");
+                render();
+              }),
+          );
+        }
+      }
+      render();
+    </script>
+  </body>
+</html>

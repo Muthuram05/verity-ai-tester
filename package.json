@@ -1,0 +1,57 @@
+{
+  "name": "verity-ai-tester",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "setup": "node --import tsx scripts/setup.ts",
+    "db:migrate": "node --import tsx scripts/migrate.ts",
+    "infra:up": "docker compose --env-file .env up -d db demo proxy",
+    "infra:build": "node scripts/infra-build.mjs",
+    "dev": "node --import tsx scripts/dev.ts",
+    "dev:web": "vite --host 127.0.0.1 --port 3000 --strictPort",
+    "dev:api": "node --import tsx apps/api/server.ts",
+    "dev:worker": "node --import tsx apps/worker/main.ts",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:integration": "node --import tsx scripts/verify.ts",
+    "test:ai": "node --import tsx scripts/verify-ai.ts",
+    "test:controls": "node --import tsx scripts/verify-controls.ts --runner",
+    "test:network": "node --import tsx scripts/verify-network.ts",
+    "test:ui": "node --import tsx scripts/verify-ui.ts",
+    "format": "prettier --write --ignore-unknown apps packages scripts tests infrastructure README.md"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/static": "10.1.5",
+    "@fastify/swagger": "^9.5.2",
+    "@node-rs/argon2": "^2.0.2",
+    "cron-parser": "^5.4.0",
+    "dotenv": "^17.2.3",
+    "fastify": "5.12.5",
+    "lucide-react": "^0.468.0",
+    "pg": "^8.16.3",
+    "pg-boss": "12.37.1",
+    "playwright": "1.64.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.15.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "esbuild": "0.28.2",
+    "prettier": "^3.9.9",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "8.3.4"
+  }
+}
