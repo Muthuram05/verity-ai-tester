@@ -34,6 +34,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { api, setCSRF } from "./api";
+import LandingPage, { landingRoutes } from "./LandingPage";
 import "./style.css";
 type Data = any;
 const icons = {
@@ -66,9 +67,9 @@ const date = (v: string) =>
 const duration = (n: number) =>
   n < 1000 ? `${n} ms` : `${(n / 1000).toFixed(1)} s`;
 function useRoute() {
-  const [route, set] = useState(location.hash.slice(1) || "overview");
+  const [route, set] = useState(location.hash.slice(1) || "home");
   useEffect(() => {
-    const cb = () => set(location.hash.slice(1) || "overview");
+    const cb = () => set(location.hash.slice(1) || "home");
     window.addEventListener("hashchange", cb);
     return () => window.removeEventListener("hashchange", cb);
   }, []);
@@ -262,12 +263,12 @@ function Auth({ done }: { done: () => void }) {
   return (
     <div className="auth-shell">
       <div className="auth-story">
-        <div className="brand">
+        <a href="#home" className="brand" aria-label="Verity home">
           <span className="brandmark">
             <Check size={24} />
           </span>
           verity
-        </div>
+        </a>
         <h1>
           Every change
           <br />
@@ -642,7 +643,7 @@ function App() {
         </main>
         <footer className="footer">
           <span>Evidence you can trace. Results you can trust.</span>
-          <span>Verity · Local MVP</span>
+          <a href="#home">About Verity</a>
         </footer>
       </div>
       {modal === "project" && (
@@ -2704,4 +2705,18 @@ function Settings({ rev, act, busy, health, user }: Data) {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+function Website() {
+  const route = useRoute();
+  const standalone = import.meta.env.MODE === "landing";
+  const publicPage = standalone || landingRoutes.has(route);
+  useEffect(() => {
+    document.title = publicPage
+      ? "Verity — Simple web app testing"
+      : "Verity · AI testing workspace";
+    if (publicPage) document.getElementById(route)?.scrollIntoView();
+    else window.scrollTo(0, 0);
+  }, [route, publicPage]);
+  return publicPage ? <LandingPage standalone={standalone} /> : <App />;
+}
+
+createRoot(document.getElementById("root")!).render(<Website />);

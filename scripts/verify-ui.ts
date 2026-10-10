@@ -19,7 +19,7 @@ const page = await context.newPage();
 const errors: string[] = [];
 let evidenceViews = 0;
 page.on("pageerror", (error) => errors.push(error.message));
-await page.goto("http://127.0.0.1:3000");
+await page.goto("http://127.0.0.1:3000/#overview");
 await page.getByLabel("Email address", { exact: true }).fill(owner.email);
 await page.getByLabel("Password", { exact: true }).fill(owner.password);
 await page.getByRole("button", { name: "Sign in", exact: true }).click();

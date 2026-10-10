@@ -16,6 +16,7 @@
     "dev:api": "node --import tsx apps/api/server.ts",
     "dev:worker": "node --import tsx apps/worker/main.ts",
     "build": "tsc --noEmit && vite build",
+    "build:site": "tsc --noEmit && vite build --mode landing",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:integration": "node --import tsx scripts/verify.ts",

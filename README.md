@@ -19,11 +19,15 @@ npm run test:ai
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. The API listens on 127.0.0.1:4000, the owned Gather demo on 127.0.0.1:4174, and PostgreSQL on 127.0.0.1:5433. The dashboard and worker must remain running for scheduled jobs.
+Open http://127.0.0.1:3000 for the public landing page, then choose **Open Verity** to sign in. The workspace is also available directly at http://127.0.0.1:3000/#overview. The API listens on 127.0.0.1:4000, the owned Gather demo on 127.0.0.1:4174, and PostgreSQL on 127.0.0.1:5433. The dashboard and worker must remain running for scheduled jobs.
 
 On a fresh installation, create the owner in the setup screen using `SETUP_TOKEN` from the locally generated `.env`. When the verification script initializes the installation, its owner credentials are stored in `.local/owner.json`, readable only by the local OS user. Do not commit or share `.env`, `.local`, credentials, screenshots, or traces.
 
 `npm run setup` preserves existing configuration. Stopping the development command leaves the database and demo containers running. `docker compose stop` stops this project's services while preserving its database volume. Do not use `down -v` unless you intend to erase local project data.
+
+## Public landing page
+
+Netlify builds the public website with `npm run build:site` and publishes `dist/web`, as configured in `netlify.toml`. This build shows the landing page and links to the local setup instructions. It does not expose the workspace or call the local API. The normal `npm run dev` and `npm run build` commands retain the full local application.
 
 ## Demonstrate the product
 
