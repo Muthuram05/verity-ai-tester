@@ -13,10 +13,6 @@ export default function LandingPage({
 }: {
   standalone?: boolean;
 }) {
-  const demoUrl = standalone
-    ? "https://github.com/Muthuram05/verity-ai-tester#start-locally"
-    : "#overview";
-  const demoLabel = standalone ? "Try the local demo" : "Open Verity";
   return (
     <div className="landing" id="home">
       <a className="landing-skip" href="#how-it-works">
@@ -32,17 +28,11 @@ export default function LandingPage({
         <nav aria-label="Website navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#what-you-need">What you need</a>
-          <a
-            className="landing-signin"
-            href={
-              standalone
-                ? "https://github.com/Muthuram05/verity-ai-tester"
-                : "#overview"
-            }
-          >
-            {standalone ? "View on GitHub" : "Sign in"}{" "}
-            <ArrowUpRight size={15} aria-hidden="true" />
-          </a>
+          {!standalone && (
+            <a className="landing-signin" href="#overview">
+              Sign in <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          )}
         </nav>
       </header>
 
@@ -59,9 +49,11 @@ export default function LandingPage({
             what passed, what failed, and what needs a closer look.
           </p>
           <div className="landing-actions">
-            <a className="landing-primary" href={demoUrl}>
-              {demoLabel} <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+            {!standalone && (
+              <a className="landing-primary" href="#overview">
+                Open Verity <ArrowUpRight size={18} aria-hidden="true" />
+              </a>
+            )}
             <a className="landing-secondary" href="#how-it-works">
               See how it works
             </a>
@@ -200,19 +192,17 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section className="landing-next" aria-labelledby="next-title">
-          <div>
-            <h2 id="next-title">See how your app holds up.</h2>
-            <p>
-              {standalone
-                ? "Follow the setup steps to run Verity on your computer."
-                : "Open the workspace and connect your first test app."}
-            </p>
-          </div>
-          <a className="landing-primary" href={demoUrl}>
-            {demoLabel} <ArrowUpRight size={18} aria-hidden="true" />
-          </a>
-        </section>
+        {!standalone && (
+          <section className="landing-next" aria-labelledby="next-title">
+            <div>
+              <h2 id="next-title">See how your app holds up.</h2>
+              <p>Open the workspace and connect your first test app.</p>
+            </div>
+            <a className="landing-primary" href="#overview">
+              Open Verity <ArrowUpRight size={18} aria-hidden="true" />
+            </a>
+          </section>
+        )}
       </main>
 
       <footer className="landing-footer">

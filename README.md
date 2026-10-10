@@ -27,7 +27,7 @@ On a fresh installation, create the owner in the setup screen using `SETUP_TOKEN
 
 ## Public landing page
 
-Netlify builds the public website with `npm run build:site` and publishes `dist/web`, as configured in `netlify.toml`. This build shows the landing page and links to the local setup instructions. It does not expose the workspace or call the local API. The normal `npm run dev` and `npm run build` commands retain the full local application.
+Netlify builds the public website with `npm run build:site` and publishes `dist/web`, as configured in `netlify.toml`. This build shows the informational landing page without demo or GitHub buttons. It does not expose the workspace or call the local API. The normal `npm run dev` and `npm run build` commands retain the full local application.
 
 ## Demonstrate the product
 
